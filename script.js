@@ -26,8 +26,19 @@ const calculator = {
     const { firstOperand, displayValue, operator } = calculator;
     const inputValue = parseFloat(displayValue);
   
-    if (operator && calculator.waitingForSecondOperand)  {
+    // Immediate calculation for square root
+    if (nextOperator === 'sqrt') {
+      const result = Math.sqrt(inputValue);
+      calculator.displayValue = `${parseFloat(result.toFixed(7))}`;
+      calculator.firstOperand = result;
+      calculator.waitingForSecondOperand = true;
+      return;
+    }
+  
+    // Update the display when operators are clicked multiple times
+    if (operator && calculator.waitingForSecondOperand) {
       calculator.operator = nextOperator;
+      calculator.displayValue = displayValue.slice(0, -2) + ` ${nextOperator} `;
       return;
     }
   
@@ -41,6 +52,11 @@ const calculator = {
   
     calculator.waitingForSecondOperand = true;
     calculator.operator = nextOperator;
+  
+    // Update display with operator
+    if (nextOperator !== '%') {
+      calculator.displayValue += ` ${nextOperator} `;
+    }
   }
   
   function calculate(firstOperand, secondOperand, operator) {
@@ -56,22 +72,13 @@ const calculator = {
       case '**':
         return Math.pow(firstOperand, secondOperand);
       case '%':
+        // Handle percentage: converts the number into a percentage (inputValue / 100)
         return firstOperand * (secondOperand / 100);
-      case 'sqrt':
-        return Math.sqrt(firstOperand);
       case 'neg':
         return -firstOperand;
-      case '!':
-        return factorial(firstOperand);
       default:
         return secondOperand;
     }
-  }
-  
-  function factorial(num) {
-    if (num < 0) return "Invalid Input";
-    if (num === 0 || num === 1) return 1;
-    return num * factorial(num - 1);
   }
   
   function resetCalculator() {
@@ -104,7 +111,6 @@ const calculator = {
       case '%':
       case 'sqrt':
       case 'neg':
-      case '!':
         handleOperator(value);
         break;
       case '=':
